@@ -20,6 +20,11 @@ module Ruby
           end
           super
         end
+
+        def to_ruby(prolog = false)
+          nodes = self.compact
+          (nodes.shift.try(:to_ruby, prolog) || '') + nodes.map { |node| node.to_ruby(true) }.join
+        end
       
         def []=(ix, object)
           object.parent = parent

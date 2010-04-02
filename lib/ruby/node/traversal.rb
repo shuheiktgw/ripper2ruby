@@ -4,7 +4,7 @@ module Ruby
       def select(*args, &block)
         result = []
         result << self if matches?(args.dup, &block)
-
+        puts result.inspect
         children = (prolog.try(:elements).to_a || []) + nodes
         children.flatten.compact.inject(result) do |result, node|
           return result if node.class.to_s == 'Symbol'          
