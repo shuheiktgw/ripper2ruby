@@ -7,6 +7,7 @@ module Ruby
 
         children = (prolog.try(:elements).to_a || []) + nodes
         children.flatten.compact.inject(result) do |result, node|
+          return result if node.class.to_s == 'Symbol'          
           result + node.select(*args, &block)
         end
       end

@@ -49,5 +49,24 @@ class TraversalTest < Test::Unit::TestCase
     assert_equal 1, nodes.size
     assert_equal [Ruby::Integer], nodes.map(&:class).uniq
     assert_equal ['4'], nodes.map(&:token)
+  end  
+  
+  define_method :"test select expression block within a Module" do                   
+    src = %q{
+    module Hello 
+      1 + (2 + (3 + 4))
+    end 
+    module Blip 
+    end
+    }
+    
+    nodes = build(src)                  
+    puts nodes.last.position.to_a    
+    hello_module = nodes.select(Ruby::Module, :token => 'Hello').first
+    # puts hello_module.last.position.to_a
+    module_nodes = nodes.select(:right_of => hello_module)    
+    assert_equal [4, 10], module_nodes.last.position.to_a
+    # can't seem to select internal expression from here!?
   end
+  
 end
