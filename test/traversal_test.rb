@@ -51,7 +51,10 @@ class TraversalTest < Test::Unit::TestCase
   #   assert_equal ['4'], nodes.map(&:token)
   # end  
   
-  define_method :"test select expression block within a Module" do                   
+  define_method :"test select expression block within a Module" do    
+    
+    require File.dirname(__FILE__) + '/ruby_api'
+                   
     src = "I18n.t(:foo)"
     code = Ripper::RubyBuilder.build(src)
     code.to_ruby # => "I18n.t(:foo)"
@@ -64,28 +67,23 @@ class TraversalTest < Test::Unit::TestCase
     module Blap
       2
     end    
-    }
 
-    src2 = %q{      
     class Hello 
     end 
     }
-
-    src = src2
     
     code = Ripper::RubyBuilder.build(src)      
     # puts code.inspect
-    # module_node = find_module(code, 'Blap') 
-    # puts "module: #{module_node}" 
+    module_node = code.find_module('Blap') 
+    puts "module: #{module_node}" 
 
-    n = code.select(Ruby::Class).first
     # puts "Statements: #{n.identifier.identifier.token.inspect}"
 
 #    puts "Statements: #{n.body[1].parent.identifier.identifier.token.inspect}"
     # .identifier.inspect
     # puts n.inspect
 
-   clazz_node = find_class(code, 'Hello') 
+   clazz_node = code.find_class('Hello') 
    puts "class: #{clazz_node}" 
     # hello_module.const.identifier.token = 'Blip'
     # puts nodes.to_ruby    
@@ -93,14 +91,8 @@ class TraversalTest < Test::Unit::TestCase
     # can't seem to select internal expression from here!?
   end
 
+  # TODO: externalize in DSL API on top of primitive API, see Ruby Best Practices!
 
-  def find_module(src, name)
-    src.select(Ruby::Module, :const => name).first
-  end
-
-  def find_class(src, name)
-    src.select(Ruby::Class, :identifier => name).first    
-  end
     
   
 end

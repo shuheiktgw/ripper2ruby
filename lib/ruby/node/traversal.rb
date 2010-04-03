@@ -4,7 +4,7 @@ module Ruby
       def select(*args, &block)
         result = []
         result << self if matches?(args.dup, &block)
-        puts args[0].inspect
+        # puts args[0].inspect
         children = (prolog.try(:elements).to_a || []) + nodes
         children.flatten.compact.inject(result) do |result, node|
           if node.class.to_s == 'Symbol'
@@ -73,7 +73,6 @@ module Ruby
         if respond_to?(:const) 
           const = self.const 
           v = const.identifier.token.to_s == value.to_s
-          puts "const? #{value} = #{v}, #{const.inspect}"
           return v
         end  
         false
@@ -84,6 +83,8 @@ module Ruby
           id = self.identifier
           return id.token.to_s == value.to_s if id.respond_to?(:token)
           return id.identifier.token.to_s == value.to_s if id.respond_to?(:identifier)
+        else
+          has_const?(value)
         end
       end
 
