@@ -83,7 +83,11 @@ module Ruby
     end
 
     def superclass?(value)      
-      return self.super_class.identifier.token == value if class_or_module?
+      if class_or_module?
+        ns = get_full_namespace(self.super_class) 
+        return ns == value
+      end
+      false      
     end
 
     def has_namespace?(value)
