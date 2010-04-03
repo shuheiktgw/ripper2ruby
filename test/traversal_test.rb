@@ -59,21 +59,48 @@ class TraversalTest < Test::Unit::TestCase
     foo = code.select(Ruby::Symbol).first
     foo.identifier.token = 'bar'
     code.to_ruby # => "I18n.t(:bar)"
+    
+    src = %q{      
+    module Blap
+      2
+    end    
+    }
 
-
-    src = %q{
-    module Hello 
-      1
+    src2 = %q{      
+    class Hello 
     end 
     }
+
+    src = src2
     
-    nodes = Ripper::RubyBuilder.build(src) 
-    puts nodes.to_ruby        
-    hello_module = nodes.select(Ruby::Module).first
-    hello_module.const.identifier.token = 'Blip'
-    puts nodes.to_ruby    
+    code = Ripper::RubyBuilder.build(src)      
+    # puts code.inspect
+    # module_node = find_module(code, 'Blap') 
+    # puts "module: #{module_node}" 
+
+    n = code.select(Ruby::Class).first
+    # puts "Statements: #{n.identifier.identifier.token.inspect}"
+
+#    puts "Statements: #{n.body[1].parent.identifier.identifier.token.inspect}"
+    # .identifier.inspect
+    # puts n.inspect
+
+   clazz_node = find_class(code, 'Hello') 
+   puts "class: #{clazz_node}" 
+    # hello_module.const.identifier.token = 'Blip'
+    # puts nodes.to_ruby    
     
     # can't seem to select internal expression from here!?
   end
+
+
+  def find_module(src, name)
+    src.select(Ruby::Module, :const => name).first
+  end
+
+  def find_class(src, name)
+    src.select(Ruby::Class, :identifier => name).first    
+  end
+    
   
 end

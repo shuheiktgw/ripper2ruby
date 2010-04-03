@@ -4,10 +4,12 @@ module Ruby
       def select(*args, &block)
         result = []
         result << self if matches?(args.dup, &block)
-        puts result.inspect
+        puts args[0].inspect
         children = (prolog.try(:elements).to_a || []) + nodes
         children.flatten.compact.inject(result) do |result, node|
-          return result if node.class.to_s == 'Symbol'          
+          if node.class.to_s == 'Symbol'
+            return result           
+          end
           result + node.select(*args, &block)
         end
       end
@@ -26,6 +28,10 @@ module Ruby
             has_token?(value)
           when :value
             has_value?(value)
+          when :identifier
+            has_identifier?(value)
+          when :const
+            has_const?(value)
           when :pos, :position
             position?(value)
           when :right_of
@@ -61,6 +67,24 @@ module Ruby
         else
           self.token == token
         end if respond_to?(:token)
+      end
+
+      def has_const?(value)  
+        if respond_to?(:const) 
+          const = self.const 
+          v = const.identifier.token.to_s == value.to_s
+          puts "const? #{value} = #{v}, #{const.inspect}"
+          return v
+        end  
+        false
+      end
+
+      def has_identifier?(value)  
+        if respond_to?(:identifier)
+          id = self.identifier
+          return id.token.to_s == value.to_s if id.respond_to?(:token)
+          return id.identifier.token.to_s == value.to_s if id.respond_to?(:identifier)
+        end
       end
 
       def has_value?(value)
