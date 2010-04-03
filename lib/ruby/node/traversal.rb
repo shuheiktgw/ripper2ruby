@@ -4,7 +4,6 @@ module Ruby
       def select(*args, &block)
         result = []
         result << self if matches?(args.dup, &block)
-        # puts args[0].inspect
         children = (prolog.try(:elements).to_a || []) + nodes
         children.flatten.compact.inject(result) do |result, node|
           if node.class.to_s == 'Symbol'
@@ -32,6 +31,8 @@ module Ruby
             has_identifier?(value)
           when :const
             has_const?(value)
+          when :namespace
+            has_namespace?(value)
           when :pos, :position
             position?(value)
           when :right_of
@@ -71,19 +72,35 @@ module Ruby
 
       def has_const?(value)  
         if respond_to?(:const) 
-          const = self.const 
-          v = const.identifier.token.to_s == value.to_s
-          return v
+          if namespace?(value)
+            name = value.split('::').last            
+            return self.const.identifier.token == name
+          end          
         end  
         false
       end
 
-      def has_identifier?(value)  
-        if respond_to?(:identifier)
+      def has_namespace?(value)  
+        if respond_to?(:namespace) 
+          return self.namespace.identifier.token == value 
+        end  
+        false
+      end
+
+
+      def has_identifier?(value)
+        if respond_to?(:identifier) 
           id = self.identifier
-          return id.token.to_s == value.to_s if id.respond_to?(:token)
-          return id.identifier.token.to_s == value.to_s if id.respond_to?(:identifier)
-        else
+          
+          if namespace?(value)
+            return id.token.to_s == value.to_s if id.respond_to?(:token)
+            if id.respond_to?(:identifier)             
+              name = value.split('::').last            
+              v = id.identifier.token == name
+              return v 
+            end
+          end
+        else             
           has_const?(value)
         end
       end
@@ -102,7 +119,35 @@ module Ruby
 
       def right_of?(left)
         left.nil? || left.position < self.position
+      end 
+      
+    protected
+      
+      def namespace?(full_name)
+        if full_name.split('::').size > 1 
+          namespaces = full_name.split('::')[0..-2]
+          namespace = namespaces.first 
+          
+          if class_or_module?
+            return module_namespace?(namespace)         
+          end
+        end 
+        true     
       end
+
+      def class_or_module?
+        [Ruby::Class, Ruby::Module].include?(self.class)
+      end
+      
+      def module_namespace?(namespace)
+        namespace == get_namespace
+      end
+
+      def get_namespace
+        return self.const.namespace.identifier.token if self.respond_to?(:const)
+        self.identifier.namespace.identifier.token
+      end
+      
     end
   end
 end

@@ -63,18 +63,29 @@ class TraversalTest < Test::Unit::TestCase
     foo.identifier.token = 'bar'
     code.to_ruby # => "I18n.t(:bar)"
     
-    src = %q{      
-    module Blap
-      2
-    end    
 
-    class Hello 
-    end 
+
+    src = %q{      
+      module Blap::Blip
+        2
+      end    
+
+      class Hello::Monty 
+      end 
     }
+
+
     
     code = Ripper::RubyBuilder.build(src)      
     # puts code.inspect
-    module_node = code.find_module('Blap') 
+    # mod = code.select(Ruby::Module).first     
+    # puts "Prolog:"           
+    # puts mod.const.identifier.inspect
+    # puts "Namespace:"               
+    # puts mod.const.namespace.inspect
+    # puts mod.const.identifier.prolog.elements.inspect
+    
+    module_node = code.find_module('Blap::Blip') 
     puts "module: #{module_node}" 
 
     # puts "Statements: #{n.identifier.identifier.token.inspect}"
@@ -83,7 +94,7 @@ class TraversalTest < Test::Unit::TestCase
     # .identifier.inspect
     # puts n.inspect
 
-   clazz_node = code.find_class('Hello') 
+   clazz_node = code.find_class('Hello::Monty') 
    puts "class: #{clazz_node}" 
     # hello_module.const.identifier.token = 'Blip'
     # puts nodes.to_ruby    
