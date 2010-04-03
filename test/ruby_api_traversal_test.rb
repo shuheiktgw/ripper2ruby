@@ -15,7 +15,7 @@ class TraversalTest < Test::Unit::TestCase
     
     code = Ripper::RubyBuilder.build(src)          
     module_node = code.find_module('Xyz::Xxx::Blip') 
-    assert_equal module_node.class, Ruby::Module
+    assert_equal Ruby::Module, module_node.class 
     # puts "module: #{module_node}" 
   end
 
@@ -26,7 +26,19 @@ class TraversalTest < Test::Unit::TestCase
     }
     code = Ripper::RubyBuilder.build(src)              
     clazz_node = code.find_class('Abc::Bef::Monty') 
-    assert_equal clazz_node.class, Ruby::Class    
+    assert_equal Ruby::Class, clazz_node.class
+    # puts "class: #{clazz_node}" 
+  end
+
+
+  define_method :"test select Class that inherits from other Class" do                           
+    src = %q{      
+      class Monty < Abc::Blip 
+      end 
+    }
+    code = Ripper::RubyBuilder.build(src)              
+    clazz_node = code.find_class('Monty', :superclass => 'Abc::Blip') 
+    assert_equal Ruby::Class, clazz_node.class     
     # puts "class: #{clazz_node}" 
   end
 

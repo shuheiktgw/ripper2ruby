@@ -31,8 +31,10 @@ module Ruby
           has_identifier?(value)
         when :const
           has_const?(value)
-        when :namespace
+        when :namespace          
           has_namespace?(value)
+        when :superclass
+          superclass?(value)            
         when :pos, :position
           position?(value)
         when :right_of
@@ -78,6 +80,10 @@ module Ruby
         end
       end
       false
+    end
+
+    def superclass?(value)      
+      return self.super_class.identifier.token == value if class_or_module?
     end
 
     def has_namespace?(value)

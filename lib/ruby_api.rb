@@ -3,9 +3,11 @@ module RubyAPI
     select(Ruby::Module, :identifier => name).first
   end
 
-  def find_class(name)
-    select(Ruby::Class, :identifier => name).first    
+  def find_class(name, options = {})
+    options.merge!(:identifier => name)
+    select(Ruby::Class, options).first    
   end
+
 end
 
 module Ruby
