@@ -1,6 +1,7 @@
 $:.unshift File.expand_path(File.dirname(__FILE__) + '/../lib')
 
 require 'ripper/ruby_builder'
+require 'ruby_api'
 require 'ripper/event_log'
 require 'test/unit'
 require 'pp'

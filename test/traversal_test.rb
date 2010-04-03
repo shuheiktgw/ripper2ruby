@@ -53,7 +53,7 @@ class TraversalTest < Test::Unit::TestCase
   
   define_method :"test select expression block within a Module" do    
     
-    require File.dirname(__FILE__) + '/ruby_api'
+    # require File.dirname(__FILE__) + '/ruby_api'
                    
     src = "I18n.t(:foo)"
     code = Ripper::RubyBuilder.build(src)
@@ -66,11 +66,11 @@ class TraversalTest < Test::Unit::TestCase
 
 
     src = %q{      
-      module Blap::Blip
+      module Xyz::Xxx::Blip
         2
       end    
 
-      class Hello::Monty 
+      class Abc::Bef::Monty 
       end 
     }
 
@@ -85,7 +85,7 @@ class TraversalTest < Test::Unit::TestCase
     # puts mod.const.namespace.inspect
     # puts mod.const.identifier.prolog.elements.inspect
     
-    module_node = code.find_module('Blap::Blip') 
+    module_node = code.find_module('Xyz::Xxx::Blip') 
     puts "module: #{module_node}" 
 
     # puts "Statements: #{n.identifier.identifier.token.inspect}"
@@ -94,7 +94,7 @@ class TraversalTest < Test::Unit::TestCase
     # .identifier.inspect
     # puts n.inspect
 
-   clazz_node = code.find_class('Hello::Monty') 
+   clazz_node = code.find_class('Abc::Bef::Monty') 
    puts "class: #{clazz_node}" 
     # hello_module.const.identifier.token = 'Blip'
     # puts nodes.to_ruby    
