@@ -31,10 +31,18 @@ module Ruby
           has_identifier?(value)
         when :const
           has_const?(value)
+        when :block
+          has_block?
         when :namespace          
           has_namespace?(value)
         when :superclass
-          superclass?(value)            
+          superclass?(value)
+        when :args
+          args?(value)                        
+        when :params
+          params?(value)                        
+        when :block_params
+          block_params?(value)                        
         when :pos, :position
           position?(value)
         when :right_of
@@ -53,6 +61,118 @@ module Ruby
         is_a?(klass) # allow to pass a symbol or string, too
       end
     end
+
+    def args?(value)
+      found = 0
+      if respond_to? :arguments
+        args = arguments.elements
+        args.each do |arg|
+          argument = get_arg(arg.arg) 
+          value.each do |v|
+            found += 1 if argument.to_s == v.to_s
+          end
+        end
+        return found == value.size
+      end
+      false
+    end
+
+    def get_arg(arg) 
+      if arg.respond_to? :token
+        arg.token
+      elsif arg.respond_to? :identifier
+        arg.identifier.token
+      elsif arg.respond_to? :key
+        {:key => arg.key, :value => arg.value}
+      elsif arg.respond_to? :elements
+        e = arg.elements
+        if e.size == 1
+          e = e[0]
+          if e.respond_to?(:token)
+            return e.token 
+          elsif e.respond_to?(:key)
+            key = e.key.identifier.token
+            key = key.to_sym if e.key.class == Ruby::Symbol
+            value = e.value.token  
+            value = value.to_i if e.value.class == Ruby::Integer
+            return {key => value}
+          else
+            puts "unknown element type"
+          end
+        end
+        e
+      end
+    end
+
+    def block_params?(value)
+      found = 0 
+      if respond_to? :block
+        p = self.block 
+        parameters = p.params.elements
+        # puts "parameters: #{parameters.inspect}"
+        parameters.each do |param| 
+          # puts "param: #{param.inspect}"          
+          parameter = get_param(param.param) 
+          # puts "parameter: #{parameter.inspect}"          
+          value.each do |v|                       
+            # puts "p: #{parameter}  == #{v}"
+            found += 1 if parameter.to_s == v.to_s
+          end
+        end  
+        # puts "#{found} == #{value.size}"
+        return found == value.size
+      end
+      false
+    end
+
+    def params?(value)
+      found = 0 
+      if respond_to? :params
+        parameters = p.params.elements
+        # puts "parameters: #{parameters.inspect}"
+        parameters.each do |param| 
+          # puts "param: #{param.inspect}"          
+          parameter = get_param(param.param) 
+          # puts "parameter: #{parameter.inspect}"          
+          value.each do |v|                       
+            # puts "p: #{parameter}  == #{v}"
+            found += 1 if parameter.to_s == v.to_s
+          end
+        end  
+        # puts "#{found} == #{value.size}"
+        return found == value.size
+      end
+      false
+    end
+
+
+    def get_param(arg) 
+      if arg.respond_to? :token
+        arg.token
+      elsif arg.respond_to? :identifier
+        arg.identifier.token
+      elsif arg.respond_to? :key
+        {:key => arg.key, :value => arg.value}
+      elsif arg.respond_to? :elements
+        e = arg.elements
+        if e.size == 1
+          e = e[0]
+          if e.respond_to?(:token)
+            return e.token 
+          elsif e.respond_to?(:key)
+            key = e.key.identifier.token
+            key = key.to_sym if e.key.class == Ruby::Symbol
+            value = e.value.token  
+            value = value.to_i if e.value.class == Ruby::Integer
+            return {key => value}
+          else
+            puts "unknown element type"
+          end
+        end
+        e
+      end
+    end
+
 
     def is_instance_of?(klass)
       case klass
@@ -82,6 +202,10 @@ module Ruby
       false
     end
 
+    def has_block?
+      respond_to? :block
+    end
+
     def superclass?(value)      
       if class_or_module?
         ns = get_full_namespace(self.super_class) 
@@ -101,7 +225,7 @@ module Ruby
     def has_identifier?(value)
       if respond_to?(:identifier)
         id = self.identifier
-
+        
         if namespace?(value)
           return id.token.to_s == value.to_s if id.respond_to?(:token)
           if id.respond_to?(:identifier)
