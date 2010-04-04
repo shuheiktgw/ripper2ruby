@@ -112,38 +112,28 @@ module Ruby
       if respond_to? :block
         p = self.block 
         parameters = p.params.elements
-        # puts "parameters: #{parameters.inspect}"
         parameters.each do |param| 
-          # puts "param: #{param.inspect}"          
           parameter = get_param(param.param) 
-          # puts "parameter: #{parameter.inspect}"          
           value.each do |v|                       
-            # puts "p: #{parameter}  == #{v}"
             found += 1 if parameter.to_s == v.to_s
           end
         end  
-        # puts "#{found} == #{value.size}"
         return found == value.size
       end
       false
     end
 
-    # TODO: Needs major refactoring!
+    # TODO: Needs major refactoring! 
     def params?(value)
       found = 0 
       if respond_to? :params
         parameters = p.params.elements
-        # puts "parameters: #{parameters.inspect}"
         parameters.each do |param| 
-          # puts "param: #{param.inspect}"          
           parameter = get_param(param.param) 
-          # puts "parameter: #{parameter.inspect}"          
           value.each do |v|                       
-            # puts "p: #{parameter}  == #{v}"
             found += 1 if parameter.to_s == v.to_s
           end
         end  
-        # puts "#{found} == #{value.size}"
         return found == value.size
       end
       false
@@ -152,31 +142,37 @@ module Ruby
     # TODO: Needs major refactoring!
     def get_param(arg) 
       if arg.respond_to? :token
-        arg.token
+        get_token(arg)
       elsif arg.respond_to? :identifier
-        arg.identifier.token
+        get_identifier(arg)
       elsif arg.respond_to? :key
-        {:key => arg.key, :value => arg.value}
+        get_hash(arg)
       elsif arg.respond_to? :elements
         e = arg.elements
         if e.size == 1
-          e = e[0]
-          if e.respond_to?(:token)
-            return e.token 
-          elsif e.respond_to?(:key)
-            key = e.key.identifier.token
-            key = key.to_sym if e.key.class == Ruby::Symbol
-            value = e.value.token  
-            value = value.to_i if e.value.class == Ruby::Integer
-            return {key => value}
-          else
-            puts "unknown element type"
-          end
+          get_param(e[0])
         end
         e
-      end
+      else
+        puts "unknown element type"
+      end        
     end
 
+    def get_hash(arg)
+      key = arg.key.identifier.token
+      key = key.to_sym if arg.key.class == Ruby::Symbol
+      value = arg.value.token  
+      value = value.to_i if arg.value.class == Ruby::Integer
+      return {key => value}
+    end
+
+    def get_identifier(arg)
+      get_token(arg.identifier)
+    end
+    
+    def get_token(arg)
+      arg.token
+    end
 
     def is_instance_of?(klass)
       case klass
