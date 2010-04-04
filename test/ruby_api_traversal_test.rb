@@ -49,7 +49,7 @@ class TraversalTest < Test::Unit::TestCase
       end 
     }
     code = Ripper::RubyBuilder.build(src)              
-    block_node = code.find_block('my_block')  
+    block_node = code.find_call('my_block')  
     assert_equal Ruby::Call, block_node.class
   end
 
@@ -61,7 +61,7 @@ class TraversalTest < Test::Unit::TestCase
       end 
     }
     code = Ripper::RubyBuilder.build(src)               
-    block_node = code.find_block('my_block', :args => [{:hello => 7}]) 
+    block_node = code.find_call('my_block', :args => [{:hello => 7}]) 
     assert_equal Ruby::Call, block_node.class
   end
 
@@ -73,7 +73,7 @@ class TraversalTest < Test::Unit::TestCase
       end 
     }
     code = Ripper::RubyBuilder.build(src)               
-    block_node = code.find_block('my_block', :block_params => ['v']) 
+    block_node = code.find_call('my_block', :block_params => ['v']) 
     assert_equal Ruby::Call, block_node.class
   end
 
@@ -85,7 +85,7 @@ class TraversalTest < Test::Unit::TestCase
       end 
     }
     code = Ripper::RubyBuilder.build(src)               
-    block_node = code.find_block('my_block', :args => [{:a => 7, 'b' => 3}]) 
+    block_node = code.find_call('my_block', :args => [{:a => 7, 'b' => 3}]) 
     assert_equal Ruby::Call, block_node.class
   end
 
@@ -97,10 +97,31 @@ class TraversalTest < Test::Unit::TestCase
       end 
     }
     code = Ripper::RubyBuilder.build(src)               
-    block_node = code.find_block('my_block', :args => [{:array =>['a', 'b']}]) 
+    block_node = code.find_call('my_block', :args => [{:array =>['a', 'b']}]) 
     assert_equal Ruby::Call, block_node.class
   end
 
+  define_method :"test select block with multi element array argument" do                           
+    src = %q{    
+      gem 'ripper', :src => 'github' 
+    }
+    code = Ripper::RubyBuilder.build(src)               
+    call_node = code.find_call('gem', :args => ['ripper', {:src => 'github'}]) 
+    assert_equal Ruby::Call, call_node.class
+  end
+
+  define_method :"test select block with multi element array argument" do                           
+    src = %q{    
+      group :test do
+        gem 'ripper', :src => 'github' 
+      end
+    }
+    code = Ripper::RubyBuilder.build(src)               
+    block_node = code.find_call('group', :args => [:test], :block => true) 
+    assert_equal Ruby::Call, block_node.class
+#    call_node = code.find_call('gem', :args => ['ripper', {:src => 'github'}]) 
+#    assert_equal Ruby::Call, call_node.class
+  end
 
 
   

@@ -67,10 +67,16 @@ module Ruby
       found = 0
       if respond_to? :arguments
         args = arguments.elements
-        args.each do |arg|
-          argument = get_arg(arg.arg) 
+        args.each do |arg|    
+          argum = arg.arg
+          argument = get_arg(argum) 
+          argument = argument.to_sym if argum.class == Ruby::Symbol
+          argument = argument.to_i if argum.class == Ruby::Integer
+          argument = argument.to_f if argum.class == Ruby::Float
+          # puts "argument: #{argument.inspect}"
           value.each do |v|            
             v = v[:array] if v.respond_to?(:has_key?) && v[:array]              
+            puts "argument: #{argument.inspect} == #{v.inspect}"            
             found += 1 if argument == v
           end
         end
@@ -81,7 +87,6 @@ module Ruby
 
     # TODO: Needs major refactoring!
     def get_arg(arg) 
-      # puts "arg: #{arg.inspect}"
       if arg.respond_to? :arg
         get_arg(arg.arg)
       elsif arg.respond_to? :token
@@ -187,8 +192,11 @@ module Ruby
       key = get_identifier(arg.key) if key.respond_to? :identifier
       key = get_identifier(arg.key).to_sym  if arg.key.class == Ruby::Symbol
       key = get_token(arg.key) if arg.key.class == Ruby::Variable
+      # puts arg.value.inspect
       value = get_token(arg.value)
       value = value.to_i if arg.value.class == Ruby::Integer
+      value = value.to_sym if arg.value.class == Ruby::Symbol
+      value = value.to_f if arg.value.class == Ruby::Float
       return {key => value}
     end
 
@@ -197,6 +205,7 @@ module Ruby
     end
     
     def get_token(arg)
+      return arg.elements[0].token if arg.class == Ruby::String        
       arg.token
     end
 

@@ -8,11 +8,10 @@ module RubyAPI
     select(Ruby::Class, options).first    
   end
 
-  def find_block(name, options = {})
+  def find_call(name, options = {})
     options.merge!(:identifier => name)
     select(options).first    
   end 
-
 
 end
 
