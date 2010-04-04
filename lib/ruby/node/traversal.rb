@@ -69,42 +69,84 @@ module Ruby
         args = arguments.elements
         args.each do |arg|
           argument = get_arg(arg.arg) 
-          value.each do |v|
-            found += 1 if argument.to_s == v.to_s
+          value.each do |v|            
+            v = v[:array] if v.respond_to?(:has_key?) && v[:array]              
+            found += 1 if argument == v
           end
         end
         return found == value.size
       end
       false
     end                             
-    
+
     # TODO: Needs major refactoring!
     def get_arg(arg) 
-      if arg.respond_to? :token
-        arg.token
+      # puts "arg: #{arg.inspect}"
+      if arg.respond_to? :arg
+        get_arg(arg.arg)
+      elsif arg.respond_to? :token
+        get_token(arg)
       elsif arg.respond_to? :identifier
-        arg.identifier.token
+        get_identifier(arg)
       elsif arg.respond_to? :key
-        {:key => arg.key, :value => arg.value}
+        get_hash_item(arg)
       elsif arg.respond_to? :elements
         e = arg.elements
         if e.size == 1
-          e = e[0]
-          if e.respond_to?(:token)
-            return e.token 
-          elsif e.respond_to?(:key)
-            key = e.key.identifier.token
-            key = key.to_sym if e.key.class == Ruby::Symbol
-            value = e.value.token  
-            value = value.to_i if e.value.class == Ruby::Integer
-            return {key => value}
-          else
-            puts "unknown element type"
-          end
-        end
-        e
+          return get_arg(e[0])
+        end 
+
+        if arg.class == Ruby::Hash 
+          get_hash(e)
+        elsif arg.class == Ruby::Array
+          get_array(e)
+        end           
+      else
+        puts "unknown element type"
       end
     end
+
+    # TODO: Needs major refactoring!
+    def get_param(arg) 
+      if arg.respond_to? :token
+        get_token(arg)
+      elsif arg.respond_to? :identifier
+        get_identifier(arg)
+      elsif arg.respond_to? :key
+        get_hash_item(arg)
+      elsif arg.respond_to? :elements
+        e = arg.elements
+        if e.size == 1
+          get_param(e[0])
+        end
+        if arg.class == Ruby::Hash 
+          get_hash(e)
+        elsif arg.class == Ruby::Array
+          get_array(e)
+        end           
+      else
+        puts "unknown element type"
+      end        
+    end
+
+
+    def get_array(args)
+      arr = []  
+      args.each do |arg|
+         arr << get_arg(arg)
+      end
+      arr
+    end 
+
+    def get_hash(args)
+      hash = {}
+      args.each do |arg|
+         hash_val = get_arg(arg)
+         hash.merge!(hash_val)
+      end
+      hash
+    end 
+
 
     # TODO: Needs major refactoring!
     def block_params?(value)
@@ -115,7 +157,8 @@ module Ruby
         parameters.each do |param| 
           parameter = get_param(param.param) 
           value.each do |v|                       
-            found += 1 if parameter.to_s == v.to_s
+            v = v[:array] if v.respond_to?(:has_key?) && v[:array]            
+            found += 1 if parameter == v
           end
         end  
         return found == value.size
@@ -130,8 +173,9 @@ module Ruby
         parameters = p.params.elements
         parameters.each do |param| 
           parameter = get_param(param.param) 
-          value.each do |v|                       
-            found += 1 if parameter.to_s == v.to_s
+          value.each do |v|  
+            v = v[:array] if v.respond_to?(:has_key?) && v[:array]
+            found += 1 if parameter == v
           end
         end  
         return found == value.size
@@ -139,29 +183,11 @@ module Ruby
       false
     end
 
-    # TODO: Needs major refactoring!
-    def get_param(arg) 
-      if arg.respond_to? :token
-        get_token(arg)
-      elsif arg.respond_to? :identifier
-        get_identifier(arg)
-      elsif arg.respond_to? :key
-        get_hash(arg)
-      elsif arg.respond_to? :elements
-        e = arg.elements
-        if e.size == 1
-          get_param(e[0])
-        end
-        e
-      else
-        puts "unknown element type"
-      end        
-    end
-
-    def get_hash(arg)
-      key = arg.key.identifier.token
-      key = key.to_sym if arg.key.class == Ruby::Symbol
-      value = arg.value.token  
+    def get_hash_item(arg)
+      key = get_identifier(arg.key) if key.respond_to? :identifier
+      key = get_identifier(arg.key).to_sym  if arg.key.class == Ruby::Symbol
+      key = get_token(arg.key) if arg.key.class == Ruby::Variable
+      value = get_token(arg.value)
       value = value.to_i if arg.value.class == Ruby::Integer
       return {key => value}
     end

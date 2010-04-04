@@ -33,7 +33,8 @@ code.find_class('Monty::Python')
 code.find_class('Monty', :superclass => 'Abc::Blip')   
 </pre>
 
-## Find block ##
+## Find block ##        
+
 <pre>
 # my_block do ... end
 code.find_block('my_block')   
@@ -53,5 +54,16 @@ code.find_block('my_block', :block_params => ['v'])
   # my_block 7, 'a', :k => 32 do |v| ... end
   code.find_block('my_block', :args => [7, 'a', {:k => 32}], :block_params => ['v'])   
 </pre>
+
+<pre>
+# my_block :a => 7, b => 3 do |v| ... end
+block_node = code.find_block('my_block', :args => [{:a => 7, 'b' => 3}])   
+</pre>     
+
+<pre>                                                                      
+# my_block ['a', 'b'] do |v| ... end  
+block_node = code.find_block('my_block', :args => [{:array =>['a', 'b']}])   
+</pre>
+    
 
 More to come soon...

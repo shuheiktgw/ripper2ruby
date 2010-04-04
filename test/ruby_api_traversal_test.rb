@@ -39,7 +39,6 @@ class TraversalTest < Test::Unit::TestCase
     code = Ripper::RubyBuilder.build(src)              
     clazz_node = code.find_class('Monty', :superclass => 'Abc::Blip') 
     assert_equal Ruby::Class, clazz_node.class     
-    # puts "class: #{clazz_node}" 
   end
 
   define_method :"test select block" do                           
@@ -55,8 +54,6 @@ class TraversalTest < Test::Unit::TestCase
   end
 
   define_method :"test select block with args" do                           
-    # my_block 7, :abe => true do |v|    
-    # 7, 'a', :blip,     
     src = %q{  
 
       my_block :hello => 7 do
@@ -64,19 +61,11 @@ class TraversalTest < Test::Unit::TestCase
       end 
     }
     code = Ripper::RubyBuilder.build(src)               
-    # , {'abe' => true}                                  
-    # , :params => ['v']                                   
-    # 7, 'a', :blip, 
     block_node = code.find_block('my_block', :args => [{:hello => 7}]) 
     assert_equal Ruby::Call, block_node.class
-    # puts block_node.inspect 
-    # puts "arg: " + block_node.arguments.elements[0].arg.elements[0].key.identifier.token  
-    # puts "param: " + block_node.block.params.elements[0].param.token
   end
 
   define_method :"test select block with params" do                           
-    # my_block 7, :abe => true do |v|    
-    # 7, 'a', :blip,     
     src = %q{  
 
       my_block do |v|
@@ -84,14 +73,32 @@ class TraversalTest < Test::Unit::TestCase
       end 
     }
     code = Ripper::RubyBuilder.build(src)               
-    # , {'abe' => true}                                  
-    # ,                                    
-    # 7, 'a', :blip, 
     block_node = code.find_block('my_block', :block_params => ['v']) 
     assert_equal Ruby::Call, block_node.class
-    # puts block_node.inspect 
-    # puts "arg: " + block_node.arguments.elements[0].arg.elements[0].key.identifier.token  
-    # puts "param: " + block_node.block.params.elements[0].param.token
+  end
+
+  define_method :"test select block with multi element hash argument" do                           
+    src = %q{  
+
+      my_block :a => 7, b => 3 do |v|
+        1
+      end 
+    }
+    code = Ripper::RubyBuilder.build(src)               
+    block_node = code.find_block('my_block', :args => [{:a => 7, 'b' => 3}]) 
+    assert_equal Ruby::Call, block_node.class
+  end
+
+  define_method :"test select block with multi element array argument" do                           
+    src = %q{  
+  
+      my_block ['a', 'b'] do |v|
+        1
+      end 
+    }
+    code = Ripper::RubyBuilder.build(src)               
+    block_node = code.find_block('my_block', :args => [{:array =>['a', 'b']}]) 
+    assert_equal Ruby::Call, block_node.class
   end
 
 
