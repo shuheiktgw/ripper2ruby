@@ -73,10 +73,8 @@ module Ruby
           argument = argument.to_sym if argum.class == Ruby::Symbol
           argument = argument.to_i if argum.class == Ruby::Integer
           argument = argument.to_f if argum.class == Ruby::Float
-          # puts "argument: #{argument.inspect}"
           value.each do |v|            
             v = v[:array] if v.respond_to?(:has_key?) && v[:array]              
-            puts "argument: #{argument.inspect} == #{v.inspect}"            
             found += 1 if argument == v
           end
         end
@@ -175,7 +173,7 @@ module Ruby
     def params?(value)
       found = 0 
       if respond_to? :params
-        parameters = p.params.elements
+        parameters = params.elements
         parameters.each do |param| 
           parameter = get_param(param.param) 
           value.each do |v|  
@@ -192,7 +190,6 @@ module Ruby
       key = get_identifier(arg.key) if key.respond_to? :identifier
       key = get_identifier(arg.key).to_sym  if arg.key.class == Ruby::Symbol
       key = get_token(arg.key) if arg.key.class == Ruby::Variable
-      # puts arg.value.inspect
       value = get_token(arg.value)
       value = value.to_i if arg.value.class == Ruby::Integer
       value = value.to_sym if arg.value.class == Ruby::Symbol
