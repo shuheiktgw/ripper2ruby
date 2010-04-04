@@ -62,6 +62,7 @@ module Ruby
       end
     end
 
+    # TODO: Needs major refactoring!
     def args?(value)
       found = 0
       if respond_to? :arguments
@@ -75,8 +76,9 @@ module Ruby
         return found == value.size
       end
       false
-    end
-
+    end                             
+    
+    # TODO: Needs major refactoring!
     def get_arg(arg) 
       if arg.respond_to? :token
         arg.token
@@ -104,6 +106,7 @@ module Ruby
       end
     end
 
+    # TODO: Needs major refactoring!
     def block_params?(value)
       found = 0 
       if respond_to? :block
@@ -125,6 +128,7 @@ module Ruby
       false
     end
 
+    # TODO: Needs major refactoring!
     def params?(value)
       found = 0 
       if respond_to? :params
@@ -145,7 +149,7 @@ module Ruby
       false
     end
 
-
+    # TODO: Needs major refactoring!
     def get_param(arg) 
       if arg.respond_to? :token
         arg.token

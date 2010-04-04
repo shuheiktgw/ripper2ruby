@@ -12,7 +12,7 @@ Differences:
 
 * A higher level API is to facilitate selecting parts of the parse tree   
 
-See files: ´ruby_api.rb´ and ´ruby_api_traversal_test.rb´
+See files: `ruby_api.rb` and `ruby_api_traversal_test.rb`
 
 ## Find module ##
 
