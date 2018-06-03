@@ -1,2 +1,2 @@
 require 'ripper/ruby_builder'
-require './ruby_api'
+require_relative './ruby_api'
